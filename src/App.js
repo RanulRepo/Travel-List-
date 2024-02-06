@@ -7,6 +7,8 @@ import { useState } from "react";
 
 export default function App() {
 
+  const [items, setItems] = useState([]);
+
   function handleAddItems(item){
     setItems((items)=> [...items, item]);
   }
@@ -23,14 +25,12 @@ export default function App() {
     );
   }
 
-  const [items, setItems] = useState([]);
-
   return (
     <div className="app">
       <Logo />
       <Form onAddItems={handleAddItems} />
       <PackingList items={items} onDeletItem={handleDeleteItems} onToggleItem={handleToggleItem} />
-      <Stats />
+      <Stats items={items} />
     </div>
   )
 }
@@ -80,11 +80,33 @@ function Form({onAddItems}) {
 }
 
 function PackingList({items, onDeletItem, onToggleItem}) {
+
+  const [sortBy, setSortby] = useState("input");
+
+  let sortedItems;
+
+  if (sortBy === "input") sortedItems = items;
+
+  if (sortBy === "description") sortedItems = items.slice().sort((a,b)=> a.description.localCompare(b.description));
+
+
+
+
+
   return (
     <div className="list">
      <ul>
-      {items.map((item) => (<Item item={item} onDeletItem={onDeletItem} key={item.id} onToggleItem={onToggleItem}/>))}
+      {sortedItems.map((item) => (<Item item={item} onDeletItem={onDeletItem} key={item.id} onToggleItem={onToggleItem}/>))}
      </ul>
+
+    <div className="actions">
+      <select value={sortBy} onChange={(e)=> setSortby(e.target.value)} >
+        <option value="input">Sort by Input Order</option>
+        <option value="description">Sort by Description</option>
+        <option value="packed">Sort by Packed Status</option>
+      </select>
+    </div>
+
     </div>
   )
 }
@@ -101,11 +123,27 @@ function Item ({item, onDeletItem, onToggleItem}){
   )
 }
 
-function Stats() {
+function Stats({items}) {
+  if(!items.length){
+    return(
+      <footer className="stats">
+      <em>
+      Start adding some items to your packing list 📃 !!!
+      </em>
+    </footer>
+    )
+  }
+
+  const numItems = items.length;
+  const numPacked = items.filter((item)=> item.packed).length;
+  const percentage = Math.round(numPacked/numItems * 100);
+
   return (
     <footer className="stats">
       <em>
-      👜 You have X items on your list, and you already have packed X (X%)
+      {percentage === 100 ? 'You got everything ready to go ✈' : 
+      `👜 You have ${numItems} items on your list, and you already have packed ${numPacked} (${percentage}%)`
+      }
       </em>
     </footer>
   )
