@@ -89,7 +89,7 @@ function PackingList({items, onDeletItem, onToggleItem}) {
 
   if (sortBy === "description") sortedItems = items.slice().sort((a,b)=> a.description.localCompare(b.description));
 
-
+  if (sortBy === "packed") sortedItems = items.slice().sort((a,b)=> Number(a.packed) - (b.packed));
 
 
 
